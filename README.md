@@ -1,3 +1,5 @@
+## Виконали: ПД-21 "Черешня" - Киян Маргарита, Солдатов Андрій
+
 ## Architecture
 
 Проєкт реалізовано як WebДодаток на стеку MERN: React (FrontendWeb), Node.js + Express (BackendApi) та MongoDB (FilmDatabase). Дані про фільми та платформи перегляду отримуються через TmdbIntegrationService, який працює з TMDb API і за потреби кешує результати в локальній базі.
