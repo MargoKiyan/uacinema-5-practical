@@ -1,104 +1,116 @@
 name: CI/CD
 
 on:
-push:
-branches: [ "**" ] # запуск на будь-яку гілку
-pull_request:
+  push:
+    branches: ["**"] # запуск на будь-яку гілку
+  pull_request:
+
 permissions:
-contents: read
-deployments: write
+  contents: read
+  deployments: write
+
 env:
-NODE_VERSION: '20.x' # приклад env на рівні workflow
+  NODE_VERSION: '20.x' # приклад env на рівні workflow
+
 jobs:
-test:
-name: Test
-runs-on: ubuntu-latest
-steps:
-- name: Checkout code
-uses: actions/checkout@v4
-# CACHE (Node.js): кешуємо node_modules за допомогою actions/ca
-che
-- name: Use Node ${{ env.NODE_VERSION }}
-uses: actions/setup-node@v4
-with:
-node-version: ${{ env.NODE_VERSION }}
-- name: Restore npm cache
-uses: actions/cache@v4
-with:
-path: |
-~/.npm
-node_modules
-key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-restore-keys: |
-npm-${{ runner.os }}-
+  test:
+    name: Test
+    runs-on: ubuntu-latest
 
-Практичне завдання 2
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-- name: Install deps
-run: npm ci
-- name: Run tests
-run: npm test -- --reporter=junit --reporter-options "mochaFile=repor
-t.xml" || true
-# '|| true' щоб продовжити і завантажити звіт навіть якщо тести впа
-ли
-# ARTIFACTS: зберігаємо звіт тестів (JUnit)
-- name: Upload test report
-uses: actions/upload-artifact@v4
-if: always()
-with:
-name: junit-report
-path: report.xml
-build:
-name: Build
-runs-on: ubuntu-latest
-needs: [test] # <— "stages": послідовність через needs
-steps:
-- uses: actions/checkout@v4
-- uses: actions/setup-node@v4
-with:
-node-version: ${{ env.NODE_VERSION }}
-- name: Restore npm cache
-uses: actions/cache@v4
-with:
-path: |
-~/.npm
-node_modules
-key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-restore-keys: |
-npm-${{ runner.os }}-
+      # CACHE (Node.js): кешуємо node_modules за допомогою actions/cache
+      - name: Use Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
-Практичне завдання 3
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
 
-- name: Install deps
-run: npm ci
-- name: Build project
-run: npm run build
-# ARTIFACTS: зберігаємо білд (наприклад, папку dist)
-- name: Upload build artifact
-uses: actions/upload-artifact@v4
-with:
-name: app-build
-path: dist
-deploy:
-name: Deploy (staging)
-runs-on: ubuntu-latest
-needs: [build] # виконуй після build
-if: github.ref == 'refs/heads/main' # деплоїмо лише з main
-environment:
-name: staging
-url: https://staging.example.com
-steps:
-- name: Download build artifact
-uses: actions/download-artifact@v4
-with:
-name: app-build
-path: ./artifact
-- name: Simulate deploy
-env:
-DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }} # використання s
-ecret
-run: |
-echo "Deploying to ${{ github.environment }} with token: ${DEPLOY_
-TOKEN:0:4}****"
-ls -la ./artifact
-echo "Deploy success"
+      # Практичне завдання 2
+      - name: Install deps
+        run: npm ci
+
+      - name: Run tests
+        # '|| true' щоб продовжити і завантажити звіт навіть якщо тести впали
+        run: npm test -- --reporter=junit --reporter-options "mochaFile=report.xml" || true
+
+      # ARTIFACTS: зберігаємо звіт тестів (JUnit)
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: report.xml
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [test] # "stages": послідовність через needs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore npm cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      # Практичне завдання 3
+      - name: Install deps
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      # ARTIFACTS: зберігаємо білд (наприклад, папку dist)
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-build
+          path: dist
+
+  deploy:
+    name: Deploy (staging)
+    runs-on: ubuntu-latest
+    needs: [build] # виконуємо після build
+    if: github.ref == 'refs/heads/main' # деплоїмо лише з main
+    environment:
+      name: staging
+      url: https://staging.example.com
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-build
+          path: ./artifact
+
+      - name: Simulate deploy
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }} # використання secret
+        run: |
+          echo "Deploying to ${{ github.environment }} with token: ${DEPLOY_TOKEN:0:4}****"
+          ls -la ./artifact
+          echo "Deploy success"
