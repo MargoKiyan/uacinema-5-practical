@@ -45,6 +45,13 @@ jobs:
         # '|| true' щоб продовжити і завантажити звіт навіть якщо тести впали
         run: npm test -- --reporter=junit --reporter-options "mochaFile=report.xml" || true
 
+      - name: Ensure report.xml exists
+        if: always()
+        run: |
+          if [ ! -f report.xml ]; then
+            echo '<?xml version="1.0" encoding="UTF-8"?><testsuite name="dummy"></testsuite>' > report.xml
+          fi
+
       # ARTIFACTS: зберігаємо звіт тестів (JUnit)
       - name: Upload test report
         if: always()
