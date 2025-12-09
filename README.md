@@ -1,33 +1,55 @@
-## Виконали: ПД-21 "Черешня" - Киян Маргарита, Солдатов Андрій
+## Виконали: ПД-21 "Черешня" – Киян Маргарита, Солдатов Андрій
 
-## Architecture
+# Практичне завдання 5 — GitHub Actions (CI/CD)
 
-Проєкт реалізовано як WebДодаток на стеку MERN: React (FrontendWeb), Node.js + Express (BackendApi) та MongoDB (FilmDatabase). Дані про фільми та платформи перегляду отримуються через TmdbIntegrationService, який працює з TMDb API і за потреби кешує результати в локальній базі.
-
-## Overview
-
-Система — це WebДодаток на стеку MERN: FrontendWeb (React SPA), BackendApi (Node.js + Express), FilmDatabase (MongoDB) та TmdbIntegrationService для роботи з TMDb API і отримання даних про фільми та платформи перегляду.
+Нижче наведено результати виконання практичного завдання з налаштування CI/CD для проєкту **uacinema** за допомогою GitHub Actions.
 
 ---
 
-| Назва компонента        | Призначення                                                                 | Основні функції                                                                                                    | Інтерфейс / Протокол       | Дані (вхід / вихід)                                                                                                   | Технології (попередньо)                | Пріоритет |
-|-------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------|----------------------------------------|-----------|
-| FrontendWeb             | Веб-інтерфейс для користувача                                              | • Пошук фільмів за назвою<br>• Застосування фільтрів<br>• Перегляд карток фільмів<br>• Перехід на сторінку фільму   | HTTPS + REST (JSON)       | Вхід: пошуковий запит, фільтри, клік по фільму; Вихід: списки фільмів, деталі фільму, посилання «Де подивитися»     | React, HTML, CSS, JavaScript/TypeScript | MVP       |
-| BackendApi              | Серверна логіка, обробка запитів від FrontendWeb                           | • Обробка пошуку<br>• Застосування фільтрів<br>• Отримання деталей фільму<br>• Агрегація даних з FilmDatabase і TMDb | HTTP REST (JSON)          | Вхід: HTTP-запити від FrontendWeb; Вихід: JSON зі списком фільмів, деталями, платформами перегляду                  | Node.js, Express, Mongoose              | MVP       |
-| FilmDatabase            | Локальне сховище даних про фільми (кеш/додаткові атрибути, тільки укр. кіно) | • Зберігання українських фільмів<br>• Зберігання додаткових метаданих/тегів<br>• Кешування відповідей TMDb           | MongoDB / Mongoose         | Вхід: запити на читання/запис від BackendApi; Вихід: документи фільмів, локальні теги, кеш-дані                      | MongoDB, Mongoose                        | MVP       |
-| TmdbIntegrationService  | Інтеграція з TMDb API                                                       | • Пошук фільмів у TMDb<br>• Отримання деталей фільму<br>• Отримання провайдерів перегляду (де подивитися)<br>• Мапінг у внутрішній формат | HTTPS / REST (TMDb API)   | Вхід: запити від BackendApi (query, filters, filmId); Вихід: сирі дані TMDb + нормалізований внутрішній формат       | TMDb REST API, HTTP-клієнт (axios/fetch) | MVP       |
-| AuthModule (опціонально)| Базова авторизація для адмінського доступу                                 | • Логін адміна<br>• Захист адмін-ендпоінтів                                                                        | HTTP REST + JWT / Session  | Вхід: креденшіали, токени; Вихід: статус логіну, токени, коди помилок                                               | JWT/Session, bcrypt                      | Future    |
-| ObservabilityAndInfra   | Логування, моніторинг, деплой, CI/CD                                      | • Логування запитів/помилок<br>• Базовий моніторинг стану сервісу<br>• Автоматичний деплой                         | Залежить від інструментів | Вхід: логи з BackendApi; Вихід: дашборди/логи для розробників                                                        | Docker, GitHubActions, логування/моніторинг | Future |
+## 1. Створення репозиторію та першого workflow
+
+Скріншот репозиторію з першим комітом і вкладкою **Actions / Workflows**.
+
+![Workflows overview](results/workflows.png)
 
 ---
 
-## MVP Components
+## 2. Успішний запуск workflow (green job) та артефакт
 
-MVP фокусується на:
+Скріншот успішного запуску (green job) та відображення артефакту у Run.
 
-- FrontendWeb  
-- BackendApi  
-- FilmDatabase  
-- TmdbIntegrationService  
+![Summary of CI run](results/summary.png)
 
-AuthModule та ObservabilityAndInfra можуть додаватися пізніше.
+---
+
+## 3. Job тестування (test)
+
+Скріншот виконання job **test** (запуск тестів у пайплайні).
+
+![Test job](results/test.png)
+
+---
+
+## 4. Job збірки (build) та артефакти
+
+Скріншот job **build** та списку артефактів зі зібраним застосунком.
+
+![Build job and artifacts](results/build.png)
+
+---
+
+## 5. Job деплою (deploy) та середовище staging
+
+Скріншот job **deploy** та панелі **Environments** з оточенням `staging`.
+
+![Deploy job and environment](results/deploy.png)
+
+---
+
+## 6. Environments, Secrets та Variables
+
+Скріншот налаштувань середовища `staging` (environments), а також розділу **Secrets and variables**.
+
+![Environments](results/enviroments.png)
+
+![Secrets and variables](results/secrets_variables.png)
